@@ -1,6 +1,6 @@
 import Countries from "./countries.js";
 
-const appId = "28a7d78ab2cf856b7f1c4c8a1968a5a7";
+const appId = "f122f5dc5a6415ed023e37c5bb518610";
 const base = "https://api.openweathermap.org"
 const link = `${base}/data/2.5/air_pollution`;
 // Get coordinates by location name
