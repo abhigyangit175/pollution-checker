@@ -20,6 +20,17 @@ const geolink = `${base}/geo/1.0/direct`;
 	const placeStateInp = document.getElementById("place-state");
 	const hint = document.getElementById("hint");
 
+	// Array of Indian states for optional input
+	const indianStates = [
+		"Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh",
+		"Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka",
+		"Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya",
+		"Mizoram", "Nagaland", "Odisha", "Punjab", "Rajasthan", "Sikkim",
+		"Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand",
+		"West Bengal"
+	];
+
+	// Event listener for search button
 	searchButton.addEventListener("click", function () {
 		let latitude;
 		let longitude;
@@ -39,20 +50,23 @@ const geolink = `${base}/geo/1.0/direct`;
 		getAirQuality(latitude.toFixed(4), longitude.toFixed(4));
 	});
 
+	// Event listener for modal close button
 	closeModalButton.addEventListener("click", function () {
 		modal.style.display = "none";
 	});
 
+	// Event listener for place name input
 	placeNameInp.oninput = function (e) {
 		findBySelectedPlace(e);
 	};
 
+	// Function to search place by name, including optional state
 	const findBySelectedPlace = async e => {
-		// Execute requests when the user is typing
 		let term = e.target.value;
+		let state = placeStateInp.value ? `,${placeStateInp.value}` : ""; // Add state if provided
 		try {
 			const rawData = await fetch(
-				`${geolink}?q=${term}` + (placeStateInp.value ? `,${placeStateInp.value}` : "") + `&appid=${appId}`
+				`${geolink}?q=${term}${state}&appid=${appId}`
 			);
 			const dataByLocationName = await rawData.json();
 			console.log(dataByLocationName);
@@ -65,11 +79,11 @@ const geolink = `${base}/geo/1.0/direct`;
 				div.onclick = () => {
 					if (item.lat && item.lon) {
 						let lat = item.lat.toFixed(4),
-							lon = item.lon.toFixed(4);					
+							lon = item.lon.toFixed(4);
 						latInp.value = lat;
 						lonInp.value = lon;
-						placeNameInp.value = item.name
-						item.state ? placeStateInp.value = item.state : placeStateInp.value = ''
+						placeNameInp.value = item.name;
+						item.state ? placeStateInp.value = item.state : placeStateInp.value = '';
 						getAirQuality(lat, lon);
 						hint.innerHTML = "";			
 					}
@@ -81,6 +95,7 @@ const geolink = `${base}/geo/1.0/direct`;
 		}
 	};
 
+	// Get user location through Geolocation API
 	const getUserLocation = () => {
 		if (navigator.geolocation) {
 			navigator.geolocation.getCurrentPosition(onPositionGathered, onPositionGatherError);
@@ -89,6 +104,7 @@ const geolink = `${base}/geo/1.0/direct`;
 		}
 	};
 
+	// Function to handle successful geolocation
 	const onPositionGathered = pos => {
 		let lat = pos.coords.latitude.toFixed(4),
 			lon = pos.coords.longitude.toFixed(4);
@@ -99,6 +115,7 @@ const geolink = `${base}/geo/1.0/direct`;
 		getAirQuality(lat, lon);
 	};
 
+	// Function to fetch and display air quality data
 	const getAirQuality = async (lat, lon) => {
 		try {
 			const rawData = await fetch(`${link}?lat=${lat}&lon=${lon}&appid=${appId}`);
@@ -112,6 +129,7 @@ const geolink = `${base}/geo/1.0/direct`;
 		}
 	};
 
+	// Function to set the values for air quality
 	const setValuesOfAir = airData => {
 		const aqi = airData.list[0].main.aqi;
 		let airStat = "";
@@ -152,6 +170,7 @@ const geolink = `${base}/geo/1.0/direct`;
 		airQualityStat.style.color = color;
 	};
 
+	// Function to set pollutant components
 	const setComponentsOfAir = airData => {
 		let components = { ...airData.list[0].components };
 		componentsEle.forEach(ele => {
@@ -160,6 +179,7 @@ const geolink = `${base}/geo/1.0/direct`;
 		});
 	};
 
+	// Function to handle location errors
 	const onPositionGatherError = e => {
 		errorLabel.innerText = e.message;
 	};
